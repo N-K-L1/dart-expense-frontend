@@ -92,22 +92,23 @@ Future<void> searchExpenses(int userId) async {
   String? search = stdin.readLineSync()?.trim();
 
   if (search == null || search.isEmpty) {
-    print("No item: $search");
+    print("No item: $search\n");
     return;
   }
 
+  // Search
   final results = expenses.where((e) {
     final item = (e['item'] ?? '').toString().toLowerCase();
     return item.contains(search.toLowerCase());
   }).toList();
 
   if (results.isEmpty) {
-    print("No item: $search");
+    print("No item: $search\n");
   } else {
     for (var e in results) {
       final dt = DateTime.parse(e['date']);
       final dtLocal = dt.toLocal();
-      print("${e['id']}. ${e['item']} : ${e['paid']}฿ : $dtLocal");
+      print("${e['id']}. ${e['item']} : ${e['paid']}฿ : $dtLocal\n");
     }
   }
 }
