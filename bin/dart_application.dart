@@ -96,7 +96,6 @@ Future<void> searchExpenses(int userId) async {
     return;
   }
 
-  // Search
   final results = expenses.where((e) {
     final item = (e['item'] ?? '').toString().toLowerCase();
     return item.contains(search.toLowerCase());
@@ -108,8 +107,9 @@ Future<void> searchExpenses(int userId) async {
     for (var e in results) {
       final dt = DateTime.parse(e['date']);
       final dtLocal = dt.toLocal();
-      print("${e['id']}. ${e['item']} : ${e['paid']}฿ : $dtLocal\n");
+      print("${e['id']}. ${e['item']} : ${e['paid']}฿ : $dtLocal");
     }
+    print("");
   }
 }
 
