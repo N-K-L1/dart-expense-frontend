@@ -113,9 +113,43 @@ Future<void> searchExpenses(int userId) async {
   }
 }
 
-// Future<void> addExpenses(){
+Future<void> addExpenses(int userId) async {
+  final url = Uri.parse('http://localhost:3000/expenses/add/$userId');
+  print("===== Add new item =====");
+  stdout.write("Item: ");
+  String? item = stdin.readLineSync()?.trim();
+  stdout.write("Paid: ");
+  String? paid = stdin.readLineSync()?.trim();
 
-// }
+  if (item == null || item.isEmpty || paid == null || paid.isEmpty) {
+    print("Invalid input\n");
+    return;
+  }
+
+  final paidAmount = int.tryParse(paid);
+  if (paidAmount == null) {
+    print("Please input a number\n");
+    return;
+  }
+
+  final body = jsonEncode({
+    "user_id": userId,
+    "item": item,
+    "paid": paidAmount,
+  });
+
+  final response = await http.post(
+    url,
+    headers: {"Content-Type": "application/json"},
+    body: body,
+  );
+
+  if (response.statusCode == 201) {
+    print("Inserted!\n");
+  } else {
+    print("Failed to add expense. Error: ${response.statusCode}\n");
+  }
+}
 
 // Future<void> deleteExpenses(){
 
@@ -144,7 +178,7 @@ Future<void> menuLoop(int userId) async {
         await searchExpenses(userId);
         break;
       case '4':
-        await todayExpenses(userId);
+        await addExpenses(userId);
         break;
       case '5':
         await todayExpenses(userId);
