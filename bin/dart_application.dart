@@ -114,7 +114,7 @@ Future<void> searchExpenses(int userId) async {
 }
 
 Future<void> addExpenses(int userId) async {
-  final url = Uri.parse('http://localhost:3000/expenses/$userId');
+  final url = Uri.parse('http://localhost:3000/expenses/add/$userId');
   print("===== Add new item =====");
   stdout.write("Item: ");
   String? item = stdin.readLineSync()?.trim();
