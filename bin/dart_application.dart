@@ -78,9 +78,40 @@ Future<void> todayExpenses(int userId) async {
   }
 }
 
-// Future<void> searchExpenses(){
+Future<void> searchExpenses(int userId) async {
+  final url = Uri.parse('http://localhost:3000/expenses/$userId');
+  final response = await http.get(url);
 
-// }
+  if (response.statusCode != 200) {
+    print("Error: ${response.statusCode}");
+    return;
+  }
+  final expenses = jsonDecode(response.body) as List;
+
+  stdout.write("Item to search: ");
+  String? search = stdin.readLineSync()?.trim();
+
+  if (search == null || search.isEmpty) {
+    print("No item: $search\n");
+    return;
+  }
+
+  final results = expenses.where((e) {
+    final item = (e['item'] ?? '').toString().toLowerCase();
+    return item.contains(search.toLowerCase());
+  }).toList();
+
+  if (results.isEmpty) {
+    print("No item: $search\n");
+  } else {
+    for (var e in results) {
+      final dt = DateTime.parse(e['date']);
+      final dtLocal = dt.toLocal();
+      print("${e['id']}. ${e['item']} : ${e['paid']}฿ : $dtLocal");
+    }
+    print("");
+  }
+}
 
 // Future<void> addExpenses(){
 
@@ -110,7 +141,7 @@ Future<void> menuLoop(int userId) async {
         await todayExpenses(userId);
         break;
       case '3':
-        await todayExpenses(userId);
+        await searchExpenses(userId);
         break;
       case '4':
         await todayExpenses(userId);
