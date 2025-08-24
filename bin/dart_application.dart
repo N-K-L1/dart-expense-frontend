@@ -151,9 +151,28 @@ Future<void> addExpenses(int userId) async {
   }
 }
 
-// Future<void> deleteExpenses(){
+Future<void> deleteExpenses(int userId) async {
+  print("===== Delete an item =====");
+  stdout.write("Item id: ");
+  String? idInput = stdin.readLineSync()?.trim();
 
-// }
+  final expenseId = int.tryParse(idInput ?? '');
+  if (expenseId == null) {
+    print("Please input a valid number\n");
+    return;
+  }
+
+  final url = Uri.parse('http://localhost:3000/expenses/delete/$userId/$expenseId');
+  final response = await http.delete(url);
+
+  if (response.statusCode == 200) {
+    print("Deleted!\n");
+  } else if (response.statusCode == 404) {
+    print("Expense not found\n");
+  } else {
+    print("Failed to delete expense");
+  }
+}
 
 Future<void> menuLoop(int userId) async {
   while (true) {
