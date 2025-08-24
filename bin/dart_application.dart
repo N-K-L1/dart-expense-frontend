@@ -78,36 +78,82 @@ Future<void> todayExpenses(int userId) async {
   }
 }
 
-// Future<void> searchExpenses(){
+Future<void> searchExpenses(int userId) async {
+  final url = Uri.parse('http://localhost:3000/expenses/$userId');
+  final response = await http.get(url);
 
-// }
+  if (response.statusCode != 200) {
+    print("Error: ${response.statusCode}");
+    return;
+  }
+  final expenses = jsonDecode(response.body) as List;
 
-// Future<void> addExpenses(){
+  stdout.write("Item to search: ");
+  String? search = stdin.readLineSync()?.trim();
 
-// }
-
-Future<void> deleteExpenses(int userId) async {
-  print("===== Delete an item =====");
-  stdout.write("Item id: ");
-  String? idInput = stdin.readLineSync()?.trim();
-
-  final expenseId = int.tryParse(idInput ?? '');
-  if (expenseId == null) {
-    print("Please input a valid number\n");
+  if (search == null || search.isEmpty) {
+    print("No item: $search\n");
     return;
   }
 
-  final url = Uri.parse('http://localhost:3000/expenses/delete/$userId/$expenseId');
-  final response = await http.delete(url);
+  final results = expenses.where((e) {
+    final item = (e['item'] ?? '').toString().toLowerCase();
+    return item.contains(search.toLowerCase());
+  }).toList();
 
-  if (response.statusCode == 200) {
-    print("Deleted!\n");
-  } else if (response.statusCode == 404) {
-    print("Expense not found\n");
+  if (results.isEmpty) {
+    print("No item: $search\n");
   } else {
-    print("Failed to delete expense");
+    for (var e in results) {
+      final dt = DateTime.parse(e['date']);
+      final dtLocal = dt.toLocal();
+      print("${e['id']}. ${e['item']} : ${e['paid']}฿ : $dtLocal");
+    }
+    print("");
   }
 }
+
+Future<void> addExpenses(int userId) async {
+  final url = Uri.parse('http://localhost:3000/expenses/add/$userId');
+  print("===== Add new item =====");
+  stdout.write("Item: ");
+  String? item = stdin.readLineSync()?.trim();
+  stdout.write("Paid: ");
+  String? paid = stdin.readLineSync()?.trim();
+
+  if (item == null || item.isEmpty || paid == null || paid.isEmpty) {
+    print("Invalid input\n");
+    return;
+  }
+
+  final paidAmount = int.tryParse(paid);
+  if (paidAmount == null) {
+    print("Please input a number\n");
+    return;
+  }
+
+  final body = jsonEncode({
+    "user_id": userId,
+    "item": item,
+    "paid": paidAmount,
+  });
+
+  final response = await http.post(
+    url,
+    headers: {"Content-Type": "application/json"},
+    body: body,
+  );
+
+  if (response.statusCode == 201) {
+    print("Inserted!\n");
+  } else {
+    print("Failed to add expense. Error: ${response.statusCode}\n");
+  }
+}
+
+// Future<void> deleteExpenses(){
+
+// }
 
 Future<void> menuLoop(int userId) async {
   while (true) {
@@ -129,13 +175,13 @@ Future<void> menuLoop(int userId) async {
         await todayExpenses(userId);
         break;
       case '3':
-        await todayExpenses(userId);
+        await searchExpenses(userId);
         break;
       case '4':
-        await todayExpenses(userId);
+        await addExpenses(userId);
         break;
       case '5':
-        await todayExpenses(userId);
+        await deleteExpenses(userId);
         break;
       case '6':
         print("-----Bye--------");
